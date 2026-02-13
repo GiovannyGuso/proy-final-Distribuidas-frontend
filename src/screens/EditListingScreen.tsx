@@ -1,5 +1,7 @@
 // src/screens/EditListingScreen.tsx
-import React, { useCallback, useMemo, useState, useEffect } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import * as Location from "expo-location";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Image,
@@ -10,9 +12,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import * as Location from "expo-location";
 import MapView, { Marker } from "react-native-maps";
-import { useFocusEffect } from "@react-navigation/native";
 import {
   Appbar,
   Button,
@@ -96,7 +96,7 @@ export default function EditListingScreen({ route, navigation }: any) {
       if (!p) return;
       const label = [p.district, p.city, p.region].filter(Boolean).join(", ");
       setCityLabel(label);
-    } catch {}
+    } catch { }
   };
 
   const ensureLocation = async () => {
@@ -160,8 +160,8 @@ export default function EditListingScreen({ route, navigation }: any) {
         item?.category_id
           ? Number(item.category_id)
           : item?.category?.id
-          ? Number(item.category.id)
-          : null
+            ? Number(item.category.id)
+            : null
       );
 
       // ✅ precargar ubicación
@@ -398,21 +398,22 @@ export default function EditListingScreen({ route, navigation }: any) {
                 </Button>
               ) : (
                 <>
-                  <View style={{ height: 150, borderRadius: 12, overflow: "hidden" }}>
-                    <MapView
-                      style={{ flex: 1 }}
-                      pointerEvents="none"
-                      region={{
-                        latitude: coords.latitude,
-                        longitude: coords.longitude,
-                        latitudeDelta: 0.01,
-                        longitudeDelta: 0.01,
-                      }}
-                    >
-                      <Marker coordinate={coords} />
-                    </MapView>
-                  </View>
-
+                  {coords?.latitude != null && coords?.longitude != null ? (
+                    <View style={{ height: 150, borderRadius: 12, overflow: "hidden" }}>
+                      <MapView
+                        style={{ flex: 1 }}
+                        pointerEvents="none"
+                        region={{
+                          latitude: coords.latitude,
+                          longitude: coords.longitude,
+                          latitudeDelta: 0.01,
+                          longitudeDelta: 0.01,
+                        }}
+                      >
+                        <Marker coordinate={coords} />
+                      </MapView>
+                    </View>
+                  ) : null}
                   <Button mode="outlined" onPress={openMap} disabled={loading}>
                     Editar ubicación en el mapa
                   </Button>

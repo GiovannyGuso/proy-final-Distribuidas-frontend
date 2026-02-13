@@ -7,7 +7,7 @@
     "icon": "./assets/images/icon.png",
     "scheme": "marketplace",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "ios": {
       "bundleIdentifier": "giovannyexpo.marketplaceapp",
       "supportsTablet": true
@@ -15,6 +15,13 @@
     "android": {
       "package": "giovannyexpo.marketplaceapp",
       "softwareKeyboardLayoutMode": "resize",
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "READ_MEDIA_IMAGES",
+        "READ_EXTERNAL_STORAGE"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -43,7 +50,20 @@
         }
       ],
       "expo-web-browser",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Permite seleccionar fotos para tus publicaciones.",
+          "cameraPermission": "Permite tomar fotos para tus publicaciones."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Permite usar tu ubicación para ubicar la publicación en el mapa."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

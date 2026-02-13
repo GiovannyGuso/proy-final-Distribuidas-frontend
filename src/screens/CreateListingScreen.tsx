@@ -3,7 +3,7 @@ import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 import React, { useEffect, useMemo, useState } from "react";
-import { Image, Modal, ScrollView, View, KeyboardAvoidingView, Platform } from "react-native";
+import { Image, KeyboardAvoidingView, Modal, Platform, ScrollView, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import {
   Appbar,
@@ -178,21 +178,30 @@ export default function CreateListingScreen({ navigation }: any) {
   // Fotos: galería / archivos / cámara
   // =========================
   const pickFromGallery = async () => {
-    setErr(null);
-    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) return setErr("Permiso de galería denegado.");
+    try {
+      setErr(null);
 
-    const res = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsMultipleSelection: true,
-      selectionLimit: Math.max(0, 10 - photos.length),
-      quality: 0.8,
-    });
+      const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!perm.granted) return setErr("Permiso de galería denegado.");
 
-    if (res.canceled) return;
-    const uris = res.assets.map((a) => a.uri);
-    setPhotos((prev) => [...prev, ...uris].slice(0, 10));
+      const res = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        // ⚠️ en Android real, multiple selection da problemas en varios dispositivos
+        allowsMultipleSelection: false,
+        quality: 0.8,
+      });
+
+      if (res.canceled) return;
+
+      const uri = res.assets?.[0]?.uri;
+      if (!uri) return setErr("No se pudo leer la imagen seleccionada.");
+
+      setPhotos((prev) => [...prev, uri].slice(0, 10));
+    } catch (e: any) {
+      setErr(e?.message || "Error abriendo la galería");
+    }
   };
+
 
   const pickFromFiles = async () => {
     setErr(null);
@@ -429,21 +438,22 @@ export default function CreateListingScreen({ navigation }: any) {
               </Button>
             ) : (
               <>
-                <View style={{ height: 150, borderRadius: 12, overflow: "hidden" }}>
-                  <MapView
-                    style={{ flex: 1 }}
-                    pointerEvents="none"
-                    region={{
-                      latitude: coords.latitude,
-                      longitude: coords.longitude,
-                      latitudeDelta: 0.01,
-                      longitudeDelta: 0.01,
-                    }}
-                  >
-                    <Marker coordinate={coords} />
-                  </MapView>
-                </View>
-
+                {coords?.latitude != null && coords?.longitude != null ? (
+                  <View style={{ height: 150, borderRadius: 12, overflow: "hidden" }}>
+                    <MapView
+                      style={{ flex: 1 }}
+                      pointerEvents="none"
+                      region={{
+                        latitude: coords.latitude,
+                        longitude: coords.longitude,
+                        latitudeDelta: 0.01,
+                        longitudeDelta: 0.01,
+                      }}
+                    >
+                      <Marker coordinate={coords} />
+                    </MapView>
+                  </View>
+                ) : null}
                 <Button mode="outlined" onPress={openMap} disabled={loading}>
                   Editar ubicación en el mapa
                 </Button>
